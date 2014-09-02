@@ -85,7 +85,7 @@ data KeyboardEventType = KeydownEvent | KeypressEvent | KeyupEvent
 
 instance keyboardEventTypeShow :: Show KeyboardEventType where
   show KeydownEvent     = "keydown"
-  show KeypressEvent       = "keypress"
+  show KeypressEvent    = "keypress"
   show KeyupEvent       = "keyup"
 
 instance keyboardEventTypeRead :: Read KeyboardEventType where
@@ -93,6 +93,7 @@ instance keyboardEventTypeRead :: Read KeyboardEventType where
   read "keypress" = KeypressEvent
   read "keyup"    = KeyupEvent
 
+-- |Values for the the `keyLocation` of a `KeyboardEvent`
 data KeyLocation = KeyLocationStandard | KeyLocationLeft | KeyLocationRight | KeyLocationNumpad
 
 toKeyLocation :: Number -> KeyLocation
@@ -113,16 +114,13 @@ class (Event e) <= KeyboardEvent e where
 
 instance keyboardEventDOMEvent :: KeyboardEvent DOMEvent where
   keyboardEventType ev = read <$> unsafeEventStringProp "type" ev
-
-  key = unsafeEventKey
-  keyCode = unsafeEventKeyCode
-
-  keyLocation ev = toKeyLocation <$> unsafeEventNumberProp "keyLocation" ev
-
-  altKey   = unsafeEventBooleanProp "altKey"
-  ctrlKey  = unsafeEventBooleanProp "ctrlKey"
-  metaKey  = unsafeEventBooleanProp "metaKey"
-  shiftKey = unsafeEventBooleanProp "shiftKey"
+  key                  = unsafeEventKey
+  keyCode              = unsafeEventKeyCode
+  keyLocation ev       = toKeyLocation <$> unsafeEventNumberProp "keyLocation" ev
+  altKey               = unsafeEventBooleanProp "altKey"
+  ctrlKey              = unsafeEventBooleanProp "ctrlKey"
+  metaKey              = unsafeEventBooleanProp "metaKey"
+  shiftKey             = unsafeEventBooleanProp "shiftKey"
 
 class KeyboardEventTarget b where
   addKeyboardEventListener :: forall e t ta. (KeyboardEvent e) =>
@@ -157,27 +155,27 @@ instance keyboardEventTargetHTMLElement :: KeyboardEventTarget HTMLElement where
 -- each of these events.  Might make to refactor more carefully based
 -- on what targets can accept what handlers.
 
-data UIEventType = LoadEvent | UnloadEvent | AbortEvent
-                 | ErrorEvent | SelectEvent | ResizeEvent
-                 | ScrollEvent
+data UIEventType = UILoadEvent | UIUnloadEvent | UIAbortEvent
+                 | UIErrorEvent | UISelectEvent | UIResizeEvent
+                 | UIScrollEvent
 
 instance uiEventTypeShow :: Show UIEventType where
-  show LoadEvent    = "load"
-  show UnloadEvent  = "unload"
-  show AbortEvent   = "abort"
-  show ErrorEvent   = "error"
-  show SelectEvent  = "select"
-  show ResizeEvent  = "resize"
-  show ScrollEvent  = "scroll"
+  show UILoadEvent    = "load"
+  show UIUnloadEvent  = "unload"
+  show UIAbortEvent   = "abort"
+  show UIErrorEvent   = "error"
+  show UISelectEvent  = "select"
+  show UIResizeEvent  = "resize"
+  show UIScrollEvent  = "scroll"
 
 instance uiEventTypeRead :: Read UIEventType where
-  read "load"     = LoadEvent
-  read "unload"   = UnloadEvent
-  read "abort"    = AbortEvent
-  read "error"    = ErrorEvent
-  read "select"   = SelectEvent
-  read "resize"   = ResizeEvent
-  read "scroll"   = ScrollEvent
+  read "load"     = UILoadEvent
+  read "unload"   = UIUnloadEvent
+  read "abort"    = UIAbortEvent
+  read "error"    = UIErrorEvent
+  read "select"   = UISelectEvent
+  read "resize"   = UIResizeEvent
+  read "scroll"   = UIScrollEvent
 
 class (Event e) <= UIEvent e where
   -- XXX this should really be returning an HTMLAbstractView...
@@ -205,11 +203,62 @@ instance uiEventTargetHTMLWindow :: UIEventTarget HTMLWindow where
   addUIEventListener typ    = unsafeAddEventListener (show typ)
   removeUIEventListener typ = unsafeRemoveEventListener (show typ)
 
-{-
-instance eventTargetXMLHttpRequest :: EventTarget XMLHttpRequest where
-  addEventListener = unsafeAddEventListener
-  removeEventListener = unsafeRemoveEventListener
--}
+{- Progress Events -}
+
+data ProgressEventType = ProgressAbortEvent
+                       | ProgressErrorEvent
+                       | ProgressLoadEvent
+                       | ProgressLoadEndEvent
+                       | ProgressLoadStartEvent
+                       | ProgressProgressEvent
+                       | ProgressTimeoutEvent
+
+instance showProgressEventType :: Show ProgressEventType where
+    show ProgressAbortEvent     = "abort"
+    show ProgressErrorEvent     = "error"
+    show ProgressLoadEvent      = "load"
+    show ProgressLoadEndEvent   = "loadend"
+    show ProgressLoadStartEvent = "loadstart"
+    show ProgressProgressEvent  = "progress"
+    show ProgressTimeoutEvent   = "timeout"
+
+instance readProgressEventType :: Read ProgressEventType where
+    read "abort"     = ProgressAbortEvent
+    read "error"     = ProgressErrorEvent
+    read "load"      = ProgressLoadEvent
+    read "loadend"   = ProgressLoadEndEvent
+    read "loadstart" = ProgressLoadStartEvent
+    read "progress"  = ProgressProgressEvent
+    read "timeout"   = ProgressTimeoutEvent
+
+class (Event e) <= ProgressEvent e where
+    progressEventType :: forall eff. e -> (Eff (dom :: DOM | eff) ProgressEventType)
+    lengthComputable  :: forall eff. e -> (Eff (dom :: DOM | eff) Boolean)
+    loaded            :: forall eff. e -> (Eff (dom :: DOM | eff) Number)
+    total             :: forall eff. e -> (Eff (dom :: DOM | eff) Number)
+
+instance progressEventDOMEvent :: ProgressEvent DOMEvent where
+    progressEventType ev = read <$> unsafeEventStringProp "type" ev
+    lengthComputable     = unsafeEventBooleanProp "lengthComputable"
+    loaded               = unsafeEventNumberProp "loaded"
+    total                = unsafeEventNumberProp "total"
+
+class ProgressEventTarget b where
+    addProgressEventListener :: forall e t ta. (ProgressEvent e) =>
+                                ProgressEventType
+                                    -> (e -> Eff (dom :: DOM | t) Unit)
+                                    -> b
+                                    -> (Eff (dom :: DOM | ta) Unit)
+
+    removeProgressEventListener :: forall e t ta. (ProgressEvent e) =>
+                                   ProgressEventType
+                                       -> (e -> Eff (dom :: DOM | t) Unit)
+                                       -> b
+                                       -> (Eff (dom :: DOM | ta) Unit)
+
+instance progressEventTargetXMLHttpRequest :: ProgressEventTarget XMLHttpRequest where
+    addProgressEventListener typ    = unsafeAddEventListener (show typ)
+    removeProgressEventListener typ = unsafeRemoveEventListener (show typ)
 
 {-
 ready :: forall t ta. (Eff (dom :: DOM | t) Unit) -> (Eff (dom :: DOM | ta) Unit)
