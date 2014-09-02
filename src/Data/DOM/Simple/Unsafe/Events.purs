@@ -30,13 +30,6 @@ foreign import unsafeRemoveEventListener
   \  };                                                     \
   \}" :: forall eff t e b. String -> (e -> Eff (dom :: DOM | t) Unit) -> b -> (Eff (dom :: DOM | eff) Unit)
 
-foreign import unsafeEventTarget
-  "function unsafeEventTarget(event) { \
-  \  return function () {         \
-  \    return event.target;       \
-  \  };                           \
-  \}" :: forall eff a. DOMEvent -> (Eff (dom :: DOM | eff) a)
-
 foreign import unsafeStopPropagation
   "function unsafeStopPropagation(event) { \
   \  return function () {           \
@@ -63,6 +56,7 @@ foreign import unsafeEventKey
   \  };                                        \
   \}" :: forall eff. DOMEvent -> (Eff (dom :: DOM | eff) String)
 
+-- XXX possibly does some fixup here?
 foreign import unsafeEventKeyCode
   "function unsafeEventKeyCode(event) { \
   \  return function() {                \
@@ -70,37 +64,12 @@ foreign import unsafeEventKeyCode
   \  };                                 \
   \}" :: forall eff. DOMEvent -> (Eff (dom :: DOM | eff) Number)
 
-foreign import unsafeEventNumberProp
-  "function unsafeEventNumberProp(prop) {  \
+foreign import unsafeEventProp
+  "function unsafeEventProp(prop) {  \
   \  return function (event) {             \
   \    return function() {                 \
   \      return event[prop];               \
   \    };                                  \
   \  };                                    \
-  \}" :: forall eff. String -> DOMEvent -> (Eff (dom :: DOM | eff) Number)
+  \}" :: forall v eff. String -> DOMEvent -> (Eff (dom :: DOM | eff) v)
 
-foreign import unsafeEventStringProp
-  "function unsafeEventStringProp(prop) {  \
-  \  return function (event) {             \
-  \    return function() {                 \
-  \      return event[prop];               \
-  \    };                                  \
-  \  };                                    \
-  \}" :: forall eff. String -> DOMEvent -> (Eff (dom :: DOM | eff) String)
-
-foreign import unsafeEventBooleanProp
-  "function unsafeEventBooleanProp(prop) { \
-  \  return function (event) {             \
-  \    return function() {                 \
-  \      return !!event[prop];             \
-  \    };                                  \
-  \  };                                    \
-  \}" :: forall eff. String -> DOMEvent -> (Eff (dom :: DOM | eff) Boolean)
-
--- XXX really should be returning an HTMLAbstractView here...
-foreign import unsafeEventView
-  "function unsafeEventView(event) { \
-  \  return function() {             \
-  \    return event.view;            \
-  \  };                              \
-  \}" :: forall eff. DOMEvent -> (Eff (dom :: DOM | eff) HTMLWindow)

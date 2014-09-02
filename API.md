@@ -349,19 +349,11 @@
 
     unsafeAddEventListener :: forall eff t e b. String -> (e -> Eff (dom :: DOM | t) Unit) -> b -> Eff (dom :: DOM | eff) Unit
 
-    unsafeEventBooleanProp :: forall eff. String -> DOMEvent -> Eff (dom :: DOM | eff) Boolean
-
     unsafeEventKey :: forall eff. DOMEvent -> Eff (dom :: DOM | eff) String
 
     unsafeEventKeyCode :: forall eff. DOMEvent -> Eff (dom :: DOM | eff) Number
 
-    unsafeEventNumberProp :: forall eff. String -> DOMEvent -> Eff (dom :: DOM | eff) Number
-
-    unsafeEventStringProp :: forall eff. String -> DOMEvent -> Eff (dom :: DOM | eff) String
-
-    unsafeEventTarget :: forall eff a. DOMEvent -> Eff (dom :: DOM | eff) a
-
-    unsafeEventView :: forall eff. DOMEvent -> Eff (dom :: DOM | eff) HTMLWindow
+    unsafeEventProp :: forall v eff. String -> DOMEvent -> Eff (dom :: DOM | eff) v
 
     unsafePreventDefault :: forall eff. DOMEvent -> Eff (dom :: DOM | eff) Unit
 

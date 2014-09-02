@@ -20,7 +20,7 @@ class Event e where
   preventDefault  :: forall eff. e -> (Eff (dom :: DOM | eff) Unit)
 
 instance eventDOMEvent :: Event DOMEvent where
-  eventTarget     = unsafeEventTarget
+  eventTarget     = unsafeEventProp "target"
   stopPropagation = unsafeStopPropagation
   preventDefault  = unsafePreventDefault
 
@@ -49,9 +49,9 @@ class (Event e) <= MouseEvent e where
   screenY :: forall eff. e -> (Eff (dom :: DOM | eff) Number)
 
 instance mouseEventDOMEvent :: MouseEvent DOMEvent where
-  mouseEventType ev = read <$> unsafeEventStringProp "type" ev
-  screenX = unsafeEventNumberProp "screenX"
-  screenY = unsafeEventNumberProp "screenY"
+  mouseEventType ev = read <$> unsafeEventProp "type" ev
+  screenX = unsafeEventProp "screenX"
+  screenY = unsafeEventProp "screenY"
 
 class MouseEventTarget b where
   addMouseEventListener :: forall e t ta. (MouseEvent e) =>
@@ -113,14 +113,14 @@ class (Event e) <= KeyboardEvent e where
   shiftKey    :: forall eff. e -> (Eff (dom :: DOM | eff) Boolean)
 
 instance keyboardEventDOMEvent :: KeyboardEvent DOMEvent where
-  keyboardEventType ev = read <$> unsafeEventStringProp "type" ev
+  keyboardEventType ev = read <$> unsafeEventProp "type" ev
   key                  = unsafeEventKey
   keyCode              = unsafeEventKeyCode
-  keyLocation ev       = toKeyLocation <$> unsafeEventNumberProp "keyLocation" ev
-  altKey               = unsafeEventBooleanProp "altKey"
-  ctrlKey              = unsafeEventBooleanProp "ctrlKey"
-  metaKey              = unsafeEventBooleanProp "metaKey"
-  shiftKey             = unsafeEventBooleanProp "shiftKey"
+  keyLocation ev       = toKeyLocation <$> unsafeEventProp "keyLocation" ev
+  altKey               = unsafeEventProp "altKey"
+  ctrlKey              = unsafeEventProp "ctrlKey"
+  metaKey              = unsafeEventProp "metaKey"
+  shiftKey             = unsafeEventProp "shiftKey"
 
 class KeyboardEventTarget b where
   addKeyboardEventListener :: forall e t ta. (KeyboardEvent e) =>
@@ -183,8 +183,8 @@ class (Event e) <= UIEvent e where
   detail :: forall eff. e -> (Eff (dom :: DOM | eff) Number)
 
 instance uiEventDOMEvent :: UIEvent DOMEvent where
-  view   = unsafeEventView
-  detail = unsafeEventNumberProp "detail"
+  view   = unsafeEventProp "view"
+  detail = unsafeEventProp "detail"
 
 class UIEventTarget b where
   addUIEventListener :: forall e t ta. (UIEvent e) =>
@@ -238,10 +238,10 @@ class (Event e) <= ProgressEvent e where
     total             :: forall eff. e -> (Eff (dom :: DOM | eff) Number)
 
 instance progressEventDOMEvent :: ProgressEvent DOMEvent where
-    progressEventType ev = read <$> unsafeEventStringProp "type" ev
-    lengthComputable     = unsafeEventBooleanProp "lengthComputable"
-    loaded               = unsafeEventNumberProp "loaded"
-    total                = unsafeEventNumberProp "total"
+    progressEventType ev = read <$> unsafeEventProp "type" ev
+    lengthComputable     = unsafeEventProp "lengthComputable"
+    loaded               = unsafeEventProp "loaded"
+    total                = unsafeEventProp "total"
 
 class ProgressEventTarget b where
     addProgressEventListener :: forall e t ta. (ProgressEvent e) =>
