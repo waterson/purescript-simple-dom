@@ -12,15 +12,23 @@
 
     open :: forall eff. String -> String -> XMLHttpRequest -> Eff (dom :: DOM | eff) Unit
 
+    openAsync :: forall eff. String -> String -> XMLHttpRequest -> Eff (dom :: DOM | eff) Unit
+
     overrideMimeType :: forall eff. String -> XMLHttpRequest -> Eff (dom :: DOM | eff) String
 
+    response :: forall obj eff. XMLHttpRequest -> Eff (dom :: DOM | eff) obj
+
     responseText :: forall eff. XMLHttpRequest -> Eff (dom :: DOM | eff) String
+
+    responseType :: forall eff. XMLHttpRequest -> Eff (dom :: DOM | eff) String
 
     send :: forall eff. XMLHttpRequest -> Eff (dom :: DOM | eff) Unit
 
     sendWithPayload :: forall eff a. a -> XMLHttpRequest -> Eff (dom :: DOM | eff) Unit
 
     setRequestHeader :: forall eff. String -> String -> XMLHttpRequest -> Eff (dom :: DOM | eff) Unit
+
+    setResponseType :: forall eff. String -> XMLHttpRequest -> Eff (dom :: DOM | eff) Unit
 
     statusText :: forall eff. XMLHttpRequest -> Eff (dom :: DOM | eff) String
 
