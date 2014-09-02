@@ -59,7 +59,7 @@ handleRequest callback evt =
 -- Construct and perform AJAX request for the specified url
 makeGetRequest url callback = do
   req <- makeXMLHttpRequest
-  addEventListener "load" (handleRequest callback) req
+  addProgressEventListener ProgressLoadEvent (handleRequest callback) req
   open "get" url req
   setRequestHeader "Content-Type" "application/json" req
   send req
