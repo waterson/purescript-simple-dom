@@ -8,10 +8,6 @@ import Data.DOM.Simple.Window(document, globalWindow)
 import Data.DOM.Simple.Ajax
 import Data.DOM.Simple.Unsafe.Events
 
--- XXX Should this be in the Prelude?
-class Read s where
-  read :: String -> s
-
 {- Generic properties and methods available on all events. -}
 
 class Event e where
@@ -36,12 +32,11 @@ instance mouseEventTypeShow :: Show MouseEventType where
   show MouseOutEvent    = "mouseout"
   show MouseLeaveEvent  = "mouseleave"
 
-instance mouseEventTypeRead :: Read MouseEventType where
-  read "mousemove"   = MouseMoveEvent
-  read "mouseover"   = MouseOverEvent
-  read "mouseenter"  = MouseEnterEvent
-  read "mouseout"    = MouseOutEvent
-  read "mouseleave"  = MouseLeaveEvent
+readMouseEventType "mousemove"   = MouseMoveEvent
+readMouseEventType "mouseover"   = MouseOverEvent
+readMouseEventType "mouseenter"  = MouseEnterEvent
+readMouseEventType "mouseout"    = MouseOutEvent
+readMouseEventType "mouseleave"  = MouseLeaveEvent
 
 class (Event e) <= MouseEvent e where
   mouseEventType :: forall eff. e -> (Eff (dom :: DOM | eff) MouseEventType)
@@ -49,7 +44,7 @@ class (Event e) <= MouseEvent e where
   screenY :: forall eff. e -> (Eff (dom :: DOM | eff) Number)
 
 instance mouseEventDOMEvent :: MouseEvent DOMEvent where
-  mouseEventType ev = read <$> unsafeEventProp "type" ev
+  mouseEventType ev = readMouseEventType <$> unsafeEventProp "type" ev
   screenX = unsafeEventProp "screenX"
   screenY = unsafeEventProp "screenY"
 
@@ -88,10 +83,9 @@ instance keyboardEventTypeShow :: Show KeyboardEventType where
   show KeypressEvent    = "keypress"
   show KeyupEvent       = "keyup"
 
-instance keyboardEventTypeRead :: Read KeyboardEventType where
-  read "keydown"  = KeydownEvent
-  read "keypress" = KeypressEvent
-  read "keyup"    = KeyupEvent
+readKeyboardEventType "keydown"  = KeydownEvent
+readKeyboardEventType "keypress" = KeypressEvent
+readKeyboardEventType "keyup"    = KeyupEvent
 
 -- |Values for the the `keyLocation` of a `KeyboardEvent`
 data KeyLocation = KeyLocationStandard | KeyLocationLeft | KeyLocationRight | KeyLocationNumpad
@@ -113,7 +107,7 @@ class (Event e) <= KeyboardEvent e where
   shiftKey    :: forall eff. e -> (Eff (dom :: DOM | eff) Boolean)
 
 instance keyboardEventDOMEvent :: KeyboardEvent DOMEvent where
-  keyboardEventType ev = read <$> unsafeEventProp "type" ev
+  keyboardEventType ev = readKeyboardEventType <$> unsafeEventProp "type" ev
   key                  = unsafeEventKey
   keyCode              = unsafeEventKeyCode
   keyLocation ev       = toKeyLocation <$> unsafeEventProp "keyLocation" ev
@@ -168,23 +162,24 @@ instance uiEventTypeShow :: Show UIEventType where
   show UIResizeEvent  = "resize"
   show UIScrollEvent  = "scroll"
 
-instance uiEventTypeRead :: Read UIEventType where
-  read "load"     = UILoadEvent
-  read "unload"   = UIUnloadEvent
-  read "abort"    = UIAbortEvent
-  read "error"    = UIErrorEvent
-  read "select"   = UISelectEvent
-  read "resize"   = UIResizeEvent
-  read "scroll"   = UIScrollEvent
+readUIEventType "load"     = UILoadEvent
+readUIEventType "unload"   = UIUnloadEvent
+readUIEventType "abort"    = UIAbortEvent
+readUIEventType "error"    = UIErrorEvent
+readUIEventType "select"   = UISelectEvent
+readUIEventType "resize"   = UIResizeEvent
+readUIEventType "scroll"   = UIScrollEvent
 
 class (Event e) <= UIEvent e where
   -- XXX this should really be returning an HTMLAbstractView...
-  view   :: forall eff. e -> (Eff (dom :: DOM | eff) HTMLWindow)
-  detail :: forall eff. e -> (Eff (dom :: DOM | eff) Number)
+  uiEventType :: forall eff. e -> (Eff (dom :: DOM | eff) UIEventType)
+  view        :: forall eff. e -> (Eff (dom :: DOM | eff) HTMLWindow)
+  detail      :: forall eff. e -> (Eff (dom :: DOM | eff) Number)
 
 instance uiEventDOMEvent :: UIEvent DOMEvent where
-  view   = unsafeEventProp "view"
-  detail = unsafeEventProp "detail"
+  uiEventType ev = readUIEventType <$> unsafeEventProp "type" ev
+  view           = unsafeEventProp "view"
+  detail         = unsafeEventProp "detail"
 
 class UIEventTarget b where
   addUIEventListener :: forall e t ta. (UIEvent e) =>
@@ -222,14 +217,13 @@ instance showProgressEventType :: Show ProgressEventType where
     show ProgressProgressEvent  = "progress"
     show ProgressTimeoutEvent   = "timeout"
 
-instance readProgressEventType :: Read ProgressEventType where
-    read "abort"     = ProgressAbortEvent
-    read "error"     = ProgressErrorEvent
-    read "load"      = ProgressLoadEvent
-    read "loadend"   = ProgressLoadEndEvent
-    read "loadstart" = ProgressLoadStartEvent
-    read "progress"  = ProgressProgressEvent
-    read "timeout"   = ProgressTimeoutEvent
+readProgressEventType "abort"     = ProgressAbortEvent
+readProgressEventType "error"     = ProgressErrorEvent
+readProgressEventType "load"      = ProgressLoadEvent
+readProgressEventType "loadend"   = ProgressLoadEndEvent
+readProgressEventType "loadstart" = ProgressLoadStartEvent
+readProgressEventType "progress"  = ProgressProgressEvent
+readProgressEventType "timeout"   = ProgressTimeoutEvent
 
 class (Event e) <= ProgressEvent e where
     progressEventType :: forall eff. e -> (Eff (dom :: DOM | eff) ProgressEventType)
@@ -238,7 +232,7 @@ class (Event e) <= ProgressEvent e where
     total             :: forall eff. e -> (Eff (dom :: DOM | eff) Number)
 
 instance progressEventDOMEvent :: ProgressEvent DOMEvent where
-    progressEventType ev = read <$> unsafeEventProp "type" ev
+    progressEventType ev = readProgressEventType <$> unsafeEventProp "type" ev
     lengthComputable     = unsafeEventProp "lengthComputable"
     loaded               = unsafeEventProp "loaded"
     total                = unsafeEventProp "total"

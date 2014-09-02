@@ -181,10 +181,8 @@
       addProgressEventListener :: forall e t ta. (ProgressEvent e) => ProgressEventType -> (e -> Eff (dom :: DOM | t) Unit) -> b -> Eff (dom :: DOM | ta) Unit
       removeProgressEventListener :: forall e t ta. (ProgressEvent e) => ProgressEventType -> (e -> Eff (dom :: DOM | t) Unit) -> b -> Eff (dom :: DOM | ta) Unit
 
-    class Read s where
-      read :: String -> s
-
     class (Event e) <= UIEvent e where
+      uiEventType :: forall eff. e -> Eff (dom :: DOM | eff) UIEventType
       view :: forall eff. e -> Eff (dom :: DOM | eff) HTMLWindow
       detail :: forall eff. e -> Eff (dom :: DOM | eff) Number
 
@@ -205,8 +203,6 @@
 
     instance keyboardEventTargetHTMLWindow :: KeyboardEventTarget HTMLWindow
 
-    instance keyboardEventTypeRead :: Read KeyboardEventType
-
     instance keyboardEventTypeShow :: Show KeyboardEventType
 
     instance mouseEventDOMEvent :: MouseEvent DOMEvent
@@ -217,23 +213,17 @@
 
     instance mouseEventTargetHTMLWindow :: MouseEventTarget HTMLWindow
 
-    instance mouseEventTypeRead :: Read MouseEventType
-
     instance mouseEventTypeShow :: Show MouseEventType
 
     instance progressEventDOMEvent :: ProgressEvent DOMEvent
 
     instance progressEventTargetXMLHttpRequest :: ProgressEventTarget XMLHttpRequest
 
-    instance readProgressEventType :: Read ProgressEventType
-
     instance showProgressEventType :: Show ProgressEventType
 
     instance uiEventDOMEvent :: UIEvent DOMEvent
 
     instance uiEventTargetHTMLWindow :: UIEventTarget HTMLWindow
-
-    instance uiEventTypeRead :: Read UIEventType
 
     instance uiEventTypeShow :: Show UIEventType
 
